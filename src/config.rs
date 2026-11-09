@@ -211,6 +211,9 @@ impl Logger {
     /// # Errors
     ///
     /// Returns [`BuildError`] when an optional sink cannot be constructed.
+    // Without the `file` feature `BuildError` is uninhabited, so the `Result`
+    // alone no longer triggers `unused_must_use`.
+    #[must_use = "the layer does nothing until it is added to a subscriber"]
     pub fn build(&self) -> Result<BackendLayer, BuildError> {
         self.ensure_realized_backends()?;
 
@@ -272,6 +275,7 @@ impl Logger {
         Ok(())
     }
 
+    // Only the `file` sink can fail; other feature sets always return `Ok`.
     #[allow(clippy::unnecessary_wraps)]
     fn build_sink(kind: &BackendKind) -> Result<crate::sink::SharedSink, BuildError> {
         Ok(match kind {
